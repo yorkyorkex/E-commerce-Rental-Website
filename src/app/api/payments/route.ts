@@ -252,15 +252,24 @@ export async function POST(request: NextRequest) {
     const db = getDatabase();
     const body: PaymentRequest = await request.json();
     
+    console.log('Payment request received:', { ...body, card_details: body.card_details ? 'HIDDEN' : undefined });
+    
     const { booking_id, payment_method, card_details } = body;
+    
+    // Validate required fields
+    if (!booking_id || !payment_method) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
     
     // Get booking details
     const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(booking_id);
     if (!booking) {
+      console.error('Booking not found:', booking_id);
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
     
     const bookingData = booking as any;
+    console.log('Found booking:', { id: bookingData.id, total_price: bookingData.total_price, payment_status: bookingData.payment_status });
     
     // Check if booking is already paid
     if (bookingData.payment_status === 'completed') {
@@ -270,15 +279,19 @@ export async function POST(request: NextRequest) {
     // Validate payment method specific requirements
     if (payment_method === 'credit_card') {
       if (!card_details || !card_details.number || !card_details.expiry || !card_details.cvv || !card_details.name) {
-        return NextResponse.json({ error: 'Credit card details are required' }, { status: 400 });
+        return NextResponse.json({ error: 'Credit card details are required for credit card payments' }, { status: 400 });
       }
     }
+    
+    console.log('Processing payment with method:', payment_method);
     
     // Process payment
     const paymentResult = await processPayment(payment_method, bookingData.total_price, card_details);
     
+    console.log('Payment processing result:', { success: paymentResult.success, transactionId: paymentResult.transactionId });
+    
     if (!paymentResult.success) {
-      return NextResponse.json({ error: paymentResult.error }, { status: 400 });
+      return NextResponse.json({ error: paymentResult.error || 'Payment processing failed' }, { status: 400 });
     }
     
     // Create payment record
@@ -295,6 +308,8 @@ export async function POST(request: NextRequest) {
       paymentResult.transactionId
     );
     
+    console.log('Payment record created:', paymentRecord.lastInsertRowid);
+    
     // Update booking status
     const updateBooking = db.prepare(`
       UPDATE bookings 
@@ -303,6 +318,8 @@ export async function POST(request: NextRequest) {
     `);
     
     updateBooking.run(payment_method, paymentResult.transactionId, booking_id);
+    
+    console.log('Booking status updated to completed');
     
     // Get updated booking
     const updatedBooking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(booking_id);
@@ -321,7 +338,10 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error processing payment:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Payment processing error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error during payment processing',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
-}
+} 

@@ -10,12 +10,28 @@ function getDatabase() {
   // Enable foreign key constraints
   db.pragma('foreign_keys = ON');
   
+  // Always ensure tables exist
+  ensureTablesExist(db);
+  
   // Initialize database if in production
   if (isProduction) {
     initializeDatabase(db);
   }
   
   return db;
+}
+
+function ensureTablesExist(db: Database.Database) {
+  // Create favorites table if it doesn't exist
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      property_id INTEGER,
+      user_session TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (property_id) REFERENCES properties (id)
+    )
+  `);
 }
 
 function initializeDatabase(db: Database.Database) {
@@ -164,38 +180,54 @@ export async function POST(request: NextRequest) {
   try {
     const { propertyId, userSession } = await request.json();
     
+    console.log('Favorites request:', { propertyId, userSession });
+    
     if (!propertyId || !userSession) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const db = getDatabase();
     
-    // 檢查是否已經收藏
+    // Check if property exists
+    const property = db.prepare('SELECT id FROM properties WHERE id = ?').get(propertyId);
+    if (!property) {
+      db.close();
+      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+    }
+    
+    // Check if already favorited
     const checkStmt = db.prepare('SELECT id FROM favorites WHERE property_id = ? AND user_session = ?');
     const existing = checkStmt.get(propertyId, userSession);
     
     if (existing) {
-      // 移除收藏
+      // Remove from favorites
       const deleteStmt = db.prepare('DELETE FROM favorites WHERE property_id = ? AND user_session = ?');
       deleteStmt.run(propertyId, userSession);
+      console.log('Removed from favorites:', propertyId);
       db.close();
-      return NextResponse.json({ favorited: false });
+      return NextResponse.json({ favorited: false, message: 'Removed from favorites' });
     } else {
-      // 新增收藏
+      // Add to favorites
       const insertStmt = db.prepare('INSERT INTO favorites (property_id, user_session) VALUES (?, ?)');
-      insertStmt.run(propertyId, userSession);
+      const result = insertStmt.run(propertyId, userSession);
+      console.log('Added to favorites:', propertyId, 'ID:', result.lastInsertRowid);
       db.close();
-      return NextResponse.json({ favorited: true });
+      return NextResponse.json({ favorited: true, message: 'Added to favorites' });
     }
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Favorites error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const userSession = searchParams.get('userSession');
+  
+  console.log('Get favorites for user:', userSession);
   
   if (!userSession) {
     return NextResponse.json({ error: 'User session required' }, { status: 400 });
@@ -204,17 +236,22 @@ export async function GET(request: NextRequest) {
   try {
     const db = getDatabase();
     const stmt = db.prepare(`
-      SELECT p.* FROM properties p
+      SELECT p.*, f.created_at as favorited_at FROM properties p
       JOIN favorites f ON p.id = f.property_id
       WHERE f.user_session = ?
       ORDER BY f.created_at DESC
     `);
     const favorites = stmt.all(userSession);
     
+    console.log(`Found ${favorites.length} favorites for user ${userSession}`);
+    
     db.close();
     return NextResponse.json(favorites);
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error fetching favorites:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }

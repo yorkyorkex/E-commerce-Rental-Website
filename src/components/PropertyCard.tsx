@@ -1,22 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Property } from '@/types';
 import Image from 'next/image';
 import { MapPin, Bed, Bath, Square, Heart } from 'lucide-react';
 
 interface PropertyCardProps {
   property: Property;
+  onFavoriteChange?: () => void;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({ property, onFavoriteChange }: PropertyCardProps) {
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [loading, setLoading] = useState(false);
   const amenities = property.amenities ? property.amenities.split(',') : [];
   
-  const handleFavorite = async () => {
+  useEffect(() => {
+    checkFavoriteStatus();
+  }, [property.id]);
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const userSession = localStorage.getItem('userSession');
+      if (!userSession) return;
+
+      const response = await fetch(`/api/favorites?userSession=${userSession}`);
+      if (response.ok) {
+        const favorites = await response.json();
+        const isFav = favorites.some((fav: any) => fav.id === property.id);
+        setIsFavorited(isFav);
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
+    }
+  };
+  
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (loading) return;
+    setLoading(true);
+    
     try {
       // Simple localStorage session for user identification
       const userSession = localStorage.getItem('userSession') || Math.random().toString(36).substr(2, 9);
       localStorage.setItem('userSession', userSession);
+
+      console.log('Toggling favorite for property:', property.id);
 
       const response = await fetch('/api/favorites', {
         method: 'POST',
@@ -29,12 +60,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         }),
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to update favorites');
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Favorite toggle result:', result);
+        setIsFavorited(result.favorited);
+        if (onFavoriteChange) {
+          onFavoriteChange();
+        }
+      } else {
+        const error = await response.json();
+        console.error('Favorite toggle error:', error);
+        throw new Error(error.error || 'Failed to update favorites');
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
       // You could show a toast notification here
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,9 +91,16 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         />
         <button
           onClick={handleFavorite}
-          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-50"
+          disabled={loading}
+          className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition-all duration-200 ${
+            isFavorited 
+              ? 'bg-red-500 text-white shadow-lg' 
+              : 'bg-white text-gray-400 hover:bg-red-50 hover:text-red-500'
+          } ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}`}
         >
-          <Heart className="w-5 h-5 text-gray-400 hover:text-red-500" />
+          <Heart 
+            className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} 
+          />
         </button>
       </div>
       

@@ -110,6 +110,30 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
   };
 
   const handlePayment = async () => {
+    // Validate payment method specific requirements
+    if (paymentMethod === 'credit_card') {
+      if (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name) {
+        alert('Please fill in all credit card details');
+        return;
+      }
+      
+      // Basic validation
+      if (cardDetails.number.replace(/\s/g, '').length < 13) {
+        alert('Please enter a valid card number');
+        return;
+      }
+      
+      if (!/^\d{2}\/\d{2}$/.test(cardDetails.expiry)) {
+        alert('Please enter expiry date in MM/YY format');
+        return;
+      }
+      
+      if (cardDetails.cvv.length < 3) {
+        alert('Please enter a valid CVV');
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       const paymentData: PaymentRequest = {
@@ -117,6 +141,8 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         payment_method: paymentMethod,
         ...(paymentMethod === 'credit_card' && { card_details: cardDetails })
       };
+
+      console.log('Processing payment:', paymentData);
 
       const response = await fetch('/api/payments', {
         method: 'POST',
@@ -126,17 +152,35 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         body: JSON.stringify(paymentData),
       });
 
+      console.log('Payment response status:', response.status);
+
       if (response.ok) {
         const paymentResult = await response.json();
-        alert('Payment successful! Booking confirmed.');
+        console.log('Payment successful:', paymentResult);
+        alert('🎉 Payment successful! Your booking has been confirmed.');
+        
+        // Reset form
+        setStep(1);
+        setCheckInDate('');
+        setCheckOutDate('');
+        setGuests(1);
+        setBooking(null);
+        setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+        
         onClose();
       } else {
-        const error = await response.json();
-        alert(error.error || 'Payment failed');
+        const errorText = await response.text();
+        console.error('Payment error response:', errorText);
+        try {
+          const error = JSON.parse(errorText);
+          alert(`Payment failed: ${error.error || 'Unknown error'}`);
+        } catch {
+          alert(`Payment failed: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (error) {
       console.error('Error processing payment:', error);
-      alert('Payment failed');
+      alert('Payment failed. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
