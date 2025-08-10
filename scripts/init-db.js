@@ -14,7 +14,7 @@ const db = new Database(dbPath);
 // 啟用外鍵約束
 db.pragma('foreign_keys = ON');
 
-// 創建資料表
+// 創建資料表/
 console.log('Creating tables...');
 
 db.exec(`
