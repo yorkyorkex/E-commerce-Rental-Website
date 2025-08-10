@@ -40,6 +40,26 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
   };
 
   const handleBookingSubmit = async () => {
+    if (!checkInDate || !checkOutDate) {
+      alert('Please select check-in and check-out dates');
+      return;
+    }
+
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+
+    if (checkIn < today) {
+      alert('Check-in date cannot be in the past');
+      return;
+    }
+
+    if (checkOut <= checkIn) {
+      alert('Check-out date must be after check-in date');
+      return;
+    }
+
     setLoading(true);
     try {
       const userSession = localStorage.getItem('userSession') || Math.random().toString(36).substr(2, 9);
@@ -53,6 +73,8 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         user_session: userSession
       };
 
+      console.log('Submitting booking:', bookingData);
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
@@ -61,18 +83,27 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         body: JSON.stringify(bookingData),
       });
 
+      console.log('Booking response status:', response.status);
+      
       if (response.ok) {
         const bookingResult = await response.json();
+        console.log('Booking successful:', bookingResult);
         setBooking(bookingResult);
         setTotalPrice(bookingResult.total_price);
         setStep(2);
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to create booking');
+        const errorText = await response.text();
+        console.error('Booking error response:', errorText);
+        try {
+          const error = JSON.parse(errorText);
+          alert(error.error || 'Failed to create booking');
+        } catch {
+          alert(`Failed to create booking: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (error) {
       console.error('Error creating booking:', error);
-      alert('Failed to create booking');
+      alert('Failed to create booking. Please try again.');
     } finally {
       setLoading(false);
     }

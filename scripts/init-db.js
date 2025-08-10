@@ -47,6 +47,38 @@ db.exec(`
   )
 `);
 
+// Create bookings table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    property_id INTEGER,
+    user_session TEXT,
+    check_in_date TEXT NOT NULL,
+    check_out_date TEXT NOT NULL,
+    guests INTEGER NOT NULL,
+    total_price INTEGER NOT NULL,
+    payment_status TEXT DEFAULT 'pending',
+    payment_method TEXT,
+    payment_id TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties (id)
+  )
+`);
+
+// Create payments table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER,
+    amount INTEGER NOT NULL,
+    payment_method TEXT NOT NULL,
+    payment_status TEXT DEFAULT 'pending',
+    transaction_id TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings (id)
+  )
+`);
+
 // Insert sample data
 console.log('Inserting sample data...');
 
