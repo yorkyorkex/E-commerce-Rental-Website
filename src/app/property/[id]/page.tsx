@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Property } from '@/types';
 import Image from 'next/image';
-import { MapPin, Bed, Bath, Square, Heart, Phone, Mail, User } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Phone, Mail, User, Calendar } from 'lucide-react';
+import BookingModal from '@/components/BookingModal';
 
 interface PropertyDetailPageProps {
   params: { id: string };
@@ -13,6 +14,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
     fetchProperty();
@@ -98,6 +100,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             <nav className="flex space-x-8">
               <a href="/" className="text-gray-500 hover:text-gray-900">Home</a>
               <a href="/favorites" className="text-gray-500 hover:text-gray-900">Favorites</a>
+              <a href="/bookings" className="text-gray-500 hover:text-gray-900">My Bookings</a>
             </nav>
           </div>
         </div>
@@ -223,16 +226,24 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 </div>
 
                 <div className="space-y-3">
+                  <button
+                    onClick={() => setShowBookingModal(true)}
+                    className="block w-full bg-primary-600 text-white text-center py-3 px-4 rounded-md hover:bg-primary-700 transition-colors font-medium"
+                  >
+                    <Calendar className="w-5 h-5 inline mr-2" />
+                    Book Now
+                  </button>
+                  
                   <a
                     href={`tel:${property.contact_phone}`}
-                    className="block w-full bg-primary-600 text-white text-center py-3 px-4 rounded-md hover:bg-primary-700 transition-colors font-medium"
+                    className="block w-full bg-white border border-primary-600 text-primary-600 text-center py-3 px-4 rounded-md hover:bg-primary-50 transition-colors font-medium"
                   >
                     Call Now
                   </a>
                   
                   <a
                     href={`mailto:${property.contact_email}?subject=Inquiry about rental: ${property.title}`}
-                    className="block w-full bg-white border border-primary-600 text-primary-600 text-center py-3 px-4 rounded-md hover:bg-primary-50 transition-colors font-medium"
+                    className="block w-full bg-gray-100 border border-gray-300 text-gray-700 text-center py-3 px-4 rounded-md hover:bg-gray-200 transition-colors font-medium"
                   >
                     Send Email
                   </a>
@@ -242,6 +253,15 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
           </div>
         </div>
       </main>
+
+      {/* Booking Modal */}
+      {property && (
+        <BookingModal
+          property={property}
+          isOpen={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+        />
+      )}
     </div>
   );
 }

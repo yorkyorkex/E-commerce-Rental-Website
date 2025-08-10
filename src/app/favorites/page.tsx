@@ -44,6 +44,7 @@ export default function FavoritesPage() {
             <nav className="flex space-x-8">
               <a href="/" className="text-gray-500 hover:text-gray-900">Home</a>
               <a href="/favorites" className="text-primary-600 font-medium">Favorites</a>
+              <a href="/bookings" className="text-gray-500 hover:text-gray-900">My Bookings</a>
             </nav>
           </div>
         </div>

@@ -1,18 +1,23 @@
+import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import path from 'path';
+import { PaymentRequest } from '@/types';
 
-// For Vercel deployment, use in-memory database since file system is read-only
-const isProduction = process.env.NODE_ENV === 'production';
-const dbPath = isProduction ? ':memory:' : path.join(process.cwd(), 'data', 'rental.db');
+// Database initialization for production
+function getDatabase() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const dbPath = isProduction ? ':memory:' : path.join(process.cwd(), 'data', 'rental.db');
+  const db = new Database(dbPath);
+  db.pragma('foreign_keys = ON');
+  
+  if (isProduction) {
+    initializeDatabase(db);
+  }
+  
+  return db;
+}
 
-// Create database connection
-export const db = new Database(dbPath);
-
-// Enable foreign key constraints
-db.pragma('foreign_keys = ON');
-
-// Create tables and initialize data
-export function initializeDatabase() {
+function initializeDatabase(db: Database.Database) {
   // Create properties table
   db.exec(`
     CREATE TABLE IF NOT EXISTS properties (
@@ -180,13 +185,106 @@ export function initializeDatabase() {
   sampleProperties.forEach(property => {
     insertProperty.run(...property);
   });
-
-  console.log('Database initialized with sample data');
 }
 
-// Initialize database when in production or when explicitly called
-if (process.env.NODE_ENV === 'production') {
-  initializeDatabase();
+// Simulate payment processing
+function processPayment(paymentMethod: string, amount: number, cardDetails?: any): Promise<{ success: boolean; transactionId?: string; error?: string }> {
+  return new Promise((resolve) => {
+    // Simulate payment processing delay
+    setTimeout(() => {
+      // Simulate 90% success rate
+      const success = Math.random() > 0.1;
+      
+      if (success) {
+        resolve({
+          success: true,
+          transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        });
+      } else {
+        resolve({
+          success: false,
+          error: 'Payment processing failed. Please try again.'
+        });
+      }
+    }, 2000); // 2 second delay to simulate real payment processing
+  });
 }
 
-export default db;
+export async function POST(request: NextRequest) {
+  try {
+    const db = getDatabase();
+    const body: PaymentRequest = await request.json();
+    
+    const { booking_id, payment_method, card_details } = body;
+    
+    // Get booking details
+    const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(booking_id);
+    if (!booking) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+    
+    const bookingData = booking as any;
+    
+    // Check if booking is already paid
+    if (bookingData.payment_status === 'completed') {
+      return NextResponse.json({ error: 'Booking is already paid' }, { status: 400 });
+    }
+    
+    // Validate payment method specific requirements
+    if (payment_method === 'credit_card') {
+      if (!card_details || !card_details.number || !card_details.expiry || !card_details.cvv || !card_details.name) {
+        return NextResponse.json({ error: 'Credit card details are required' }, { status: 400 });
+      }
+    }
+    
+    // Process payment
+    const paymentResult = await processPayment(payment_method, bookingData.total_price, card_details);
+    
+    if (!paymentResult.success) {
+      return NextResponse.json({ error: paymentResult.error }, { status: 400 });
+    }
+    
+    // Create payment record
+    const insertPayment = db.prepare(`
+      INSERT INTO payments (booking_id, amount, payment_method, payment_status, transaction_id)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    const paymentRecord = insertPayment.run(
+      booking_id,
+      bookingData.total_price,
+      payment_method,
+      'completed',
+      paymentResult.transactionId
+    );
+    
+    // Update booking status
+    const updateBooking = db.prepare(`
+      UPDATE bookings 
+      SET payment_status = 'completed', payment_method = ?, payment_id = ?
+      WHERE id = ?
+    `);
+    
+    updateBooking.run(payment_method, paymentResult.transactionId, booking_id);
+    
+    // Get updated booking
+    const updatedBooking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(booking_id);
+    
+    db.close();
+    
+    return NextResponse.json({
+      success: true,
+      booking: updatedBooking,
+      payment: {
+        id: paymentRecord.lastInsertRowid,
+        transaction_id: paymentResult.transactionId,
+        amount: bookingData.total_price,
+        payment_method,
+        status: 'completed'
+      }
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

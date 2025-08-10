@@ -1,18 +1,23 @@
+import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import path from 'path';
+import { BookingRequest } from '@/types';
 
-// For Vercel deployment, use in-memory database since file system is read-only
-const isProduction = process.env.NODE_ENV === 'production';
-const dbPath = isProduction ? ':memory:' : path.join(process.cwd(), 'data', 'rental.db');
+// Database initialization for production
+function getDatabase() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const dbPath = isProduction ? ':memory:' : path.join(process.cwd(), 'data', 'rental.db');
+  const db = new Database(dbPath);
+  db.pragma('foreign_keys = ON');
+  
+  if (isProduction) {
+    initializeDatabase(db);
+  }
+  
+  return db;
+}
 
-// Create database connection
-export const db = new Database(dbPath);
-
-// Enable foreign key constraints
-db.pragma('foreign_keys = ON');
-
-// Create tables and initialize data
-export function initializeDatabase() {
+function initializeDatabase(db: Database.Database) {
   // Create properties table
   db.exec(`
     CREATE TABLE IF NOT EXISTS properties (
@@ -180,13 +185,79 @@ export function initializeDatabase() {
   sampleProperties.forEach(property => {
     insertProperty.run(...property);
   });
-
-  console.log('Database initialized with sample data');
 }
 
-// Initialize database when in production or when explicitly called
-if (process.env.NODE_ENV === 'production') {
-  initializeDatabase();
+export async function POST(request: NextRequest) {
+  try {
+    const db = getDatabase();
+    const body: BookingRequest = await request.json();
+    
+    const { property_id, check_in_date, check_out_date, guests, user_session } = body;
+    
+    // Validate dates
+    const checkIn = new Date(check_in_date);
+    const checkOut = new Date(check_out_date);
+    const today = new Date();
+    
+    if (checkIn < today) {
+      return NextResponse.json({ error: 'Check-in date cannot be in the past' }, { status: 400 });
+    }
+    
+    if (checkOut <= checkIn) {
+      return NextResponse.json({ error: 'Check-out date must be after check-in date' }, { status: 400 });
+    }
+    
+    // Get property details
+    const property = db.prepare('SELECT * FROM properties WHERE id = ?').get(property_id);
+    if (!property) {
+      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+    }
+    
+    // Calculate total price (price per night * number of nights)
+    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const total_price = (property as any).price * nights;
+    
+    // Create booking
+    const insertBooking = db.prepare(`
+      INSERT INTO bookings (property_id, user_session, check_in_date, check_out_date, guests, total_price)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    
+    const result = insertBooking.run(property_id, user_session, check_in_date, check_out_date, guests, total_price);
+    
+    // Get the created booking
+    const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(result.lastInsertRowid);
+    
+    db.close();
+    return NextResponse.json(booking);
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
-export default db;
+export async function GET(request: NextRequest) {
+  try {
+    const db = getDatabase();
+    const { searchParams } = new URL(request.url);
+    const user_session = searchParams.get('user_session');
+    
+    if (!user_session) {
+      return NextResponse.json({ error: 'User session required' }, { status: 400 });
+    }
+    
+    const bookings = db.prepare(`
+      SELECT b.*, p.title, p.images, p.location 
+      FROM bookings b 
+      JOIN properties p ON b.property_id = p.id 
+      WHERE b.user_session = ? 
+      ORDER BY b.created_at DESC
+    `).all(user_session);
+    
+    db.close();
+    return NextResponse.json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
