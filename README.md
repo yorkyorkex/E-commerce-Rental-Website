@@ -84,6 +84,31 @@ npm start
 2. Connect GitHub repository in Vercel
 3. Vercel will automatically build and deploy
 
+**Important Notes for Production:**
+- The app uses SQLite which works locally but uses in-memory database on Vercel
+- For persistent data in production, consider using Vercel Postgres, PlanetScale, or Supabase
+- The current setup will reinitialize sample data on each deployment
+
+### Steps for Vercel Deployment:
+
+1. **Prepare for deployment:**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Deploy on Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel will automatically detect Next.js and deploy
+
+3. **Alternative: Deploy via Vercel CLI:**
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
+
 ## Project Structure
 
 ```
