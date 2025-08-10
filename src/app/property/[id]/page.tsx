@@ -105,9 +105,9 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 左側 - 圖片和詳細資訊 */}
+          {/* Left Side - Images and Details */}
           <div className="lg:col-span-2">
-            {/* 主圖 */}
+            {/* Main Image */}
             <div className="relative h-96 rounded-lg overflow-hidden mb-6">
               <Image
                 src={property.images}
@@ -117,7 +117,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
               />
             </div>
 
-            {/* 標題和基本資訊 */}
+            {/* Title and Basic Info */}
             <div className="bg-white rounded-lg p-6 mb-6">
               <div className="flex justify-between items-start mb-4">
                 <h1 className="text-3xl font-bold text-gray-900">

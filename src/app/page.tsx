@@ -27,10 +27,14 @@ export default function Home() {
       });
 
       const response = await fetch(`/api/properties?${params}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      setProperties(data);
+      setProperties(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setProperties([]); // Set empty array on error
     } finally {
       setLoading(false);
     }

@@ -13,12 +13,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const amenities = property.amenities ? property.amenities.split(',') : [];
   
   const handleFavorite = async () => {
-    // 簡單的本地存儲作為用戶會話
-    const userSession = localStorage.getItem('userSession') || Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('userSession', userSession);
-
     try {
-      await fetch('/api/favorites', {
+      // Simple localStorage session for user identification
+      const userSession = localStorage.getItem('userSession') || Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userSession', userSession);
+
+      const response = await fetch('/api/favorites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,8 +28,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           userSession,
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update favorites');
+      }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      // You could show a toast notification here
     }
   };
 
