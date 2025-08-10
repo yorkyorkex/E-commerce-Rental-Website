@@ -62,7 +62,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">載入中...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -72,12 +72,12 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">找不到該物件</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Property not found</h1>
           <a
             href="/"
             className="text-primary-600 hover:text-primary-700"
           >
-            返回首頁
+            Back to Home
           </a>
         </div>
       </div>
@@ -93,11 +93,11 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-3xl font-bold text-gray-900">
-              <a href="/">租屋網站</a>
+              <a href="/">Rental Properties</a>
             </h1>
             <nav className="flex space-x-8">
-              <a href="/" className="text-gray-500 hover:text-gray-900">首頁</a>
-              <a href="/favorites" className="text-gray-500 hover:text-gray-900">收藏</a>
+              <a href="/" className="text-gray-500 hover:text-gray-900">Home</a>
+              <a href="/favorites" className="text-gray-500 hover:text-gray-900">Favorites</a>
             </nav>
           </div>
         </div>
@@ -143,15 +143,15 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
               <div className="flex items-center space-x-6 mb-6">
                 <div className="flex items-center text-gray-600">
                   <Bed className="w-5 h-5 mr-2" />
-                  <span>{property.bedrooms} 房間</span>
+                  <span>{property.bedrooms} bedrooms</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Bath className="w-5 h-5 mr-2" />
-                  <span>{property.bathrooms} 衛浴</span>
+                  <span>{property.bathrooms} bathrooms</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Square className="w-5 h-5 mr-2" />
-                  <span>{property.area} 坪</span>
+                  <span>{property.area} sqft</span>
                 </div>
                 <span className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium">
                   {property.type}
@@ -159,15 +159,15 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">物件描述</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Property Description</h3>
                 <p className="text-gray-600 leading-relaxed">{property.description}</p>
               </div>
             </div>
 
-            {/* 設施 */}
+            {/* Amenities */}
             {amenities.length > 0 && (
               <div className="bg-white rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">設施與設備</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Amenities & Features</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {amenities.map((amenity, index) => (
                     <div
@@ -182,18 +182,18 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             )}
           </div>
 
-          {/* 右側 - 價格和聯絡資訊 */}
+          {/* Right Side - Price and Contact Info */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg p-6 sticky top-8">
               <div className="text-center mb-6">
                 <div className="text-4xl font-bold text-primary-600 mb-2">
-                  NT$ {property.price.toLocaleString()}
+                  $ {property.price.toLocaleString()}
                 </div>
-                <div className="text-gray-500">每月租金</div>
+                <div className="text-gray-500">per month</div>
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">聯絡房東</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Landlord</h3>
                 
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center">
@@ -227,14 +227,14 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                     href={`tel:${property.contact_phone}`}
                     className="block w-full bg-primary-600 text-white text-center py-3 px-4 rounded-md hover:bg-primary-700 transition-colors font-medium"
                   >
-                    撥打電話
+                    Call Now
                   </a>
                   
                   <a
-                    href={`mailto:${property.contact_email}?subject=詢問租屋：${property.title}`}
+                    href={`mailto:${property.contact_email}?subject=Inquiry about rental: ${property.title}`}
                     className="block w-full bg-white border border-primary-600 text-primary-600 text-center py-3 px-4 rounded-md hover:bg-primary-50 transition-colors font-medium"
                   >
-                    發送郵件
+                    Send Email
                   </a>
                 </div>
               </div>

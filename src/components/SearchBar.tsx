@@ -26,14 +26,14 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
-          placeholder="搜尋地區、物件類型或關鍵字..."
+          placeholder="Search by location, property type, or keywords..."
         />
         <div className="absolute inset-y-0 right-0 flex items-center">
           <button
             type="submit"
             className="bg-primary-600 text-white px-6 py-3 rounded-r-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
-            搜尋
+            Search
           </button>
         </div>
       </div>

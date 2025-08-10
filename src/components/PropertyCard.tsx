@@ -68,15 +68,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <div className="flex space-x-4 text-sm text-gray-600">
             <div className="flex items-center">
               <Bed className="w-4 h-4 mr-1" />
-              <span>{property.bedrooms}房</span>
+              <span>{property.bedrooms} bed</span>
             </div>
             <div className="flex items-center">
               <Bath className="w-4 h-4 mr-1" />
-              <span>{property.bathrooms}衛</span>
+              <span>{property.bathrooms} bath</span>
             </div>
             <div className="flex items-center">
               <Square className="w-4 h-4 mr-1" />
-              <span>{property.area}坪</span>
+              <span>{property.area} sqft</span>
             </div>
           </div>
         </div>
@@ -84,9 +84,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-2xl font-bold text-primary-600">
-              NT$ {property.price.toLocaleString()}
+              $ {property.price.toLocaleString()}
             </span>
-            <span className="text-gray-500 text-sm">/月</span>
+            <span className="text-gray-500 text-sm">/month</span>
           </div>
           <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
             {property.type}
@@ -106,7 +106,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               ))}
               {amenities.length > 3 && (
                 <span className="text-gray-500 text-xs">
-                  +{amenities.length - 3} 更多
+                  +{amenities.length - 3} more
                 </span>
               )}
             </div>
@@ -118,7 +118,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             href={`/property/${property.id}`}
             className="block w-full bg-primary-600 text-white text-center py-2 px-4 rounded-md hover:bg-primary-700 transition-colors"
           >
-            查看詳情
+            View Details
           </a>
         </div>
       </div>

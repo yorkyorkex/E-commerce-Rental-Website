@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: '租屋網站 - 找到您的理想住所',
-  description: '提供優質租屋資訊，幫助您找到理想的住所',
+  title: 'Rental Property Website - Find Your Perfect Home',
+  description: 'Find quality rental properties and discover your ideal home',
 }
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh-TW">
+    <html lang="en">
       <body className={inter.className}>{children}</body>
     </html>
   )

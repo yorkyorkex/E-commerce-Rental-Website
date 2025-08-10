@@ -39,18 +39,18 @@ export default function FavoritesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-3xl font-bold text-gray-900">
-              <a href="/">租屋網站</a>
+              <a href="/">Rental Properties</a>
             </h1>
             <nav className="flex space-x-8">
-              <a href="/" className="text-gray-500 hover:text-gray-900">首頁</a>
-              <a href="/favorites" className="text-primary-600 font-medium">收藏</a>
+              <a href="/" className="text-gray-500 hover:text-gray-900">Home</a>
+              <a href="/favorites" className="text-primary-600 font-medium">Favorites</a>
             </nav>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">我的收藏</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">My Favorites</h2>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -79,15 +79,15 @@ export default function FavoritesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">尚無收藏物件</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No favorite properties yet</h3>
               <p className="text-gray-500 mb-6">
-                瀏覽物件時點擊愛心圖示即可加入收藏
+                Click the heart icon when viewing properties to add them to your favorites
               </p>
               <a
                 href="/"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
-                開始瀏覽物件
+                Browse Properties
               </a>
             </div>
           </div>

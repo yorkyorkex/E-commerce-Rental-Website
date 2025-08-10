@@ -10,16 +10,16 @@ interface FilterPanelProps {
 
 export default function FilterPanel({ filters, onFiltersChange }: FilterPanelProps) {
   const locations = [
-    '台北市中山區',
-    '台北市大安區',
-    '新北市板橋區',
-    '台中市西屯區',
-    '高雄市前金區',
-    '桃園市中壢區',
-    '台南市東區',
+    'Manhattan, New York',
+    'Brooklyn, New York',
+    'Downtown, Los Angeles',
+    'Miami, Florida',
+    'Austin, Texas',
+    'Portland, Oregon',
+    'Seattle, Washington',
   ];
 
-  const propertyTypes = ['套房', '雅房', '公寓', '電梯大廈', '透天厝'];
+  const propertyTypes = ['Studio', 'Shared Room', 'Apartment', 'High-rise', 'Loft'];
 
   const handleFilterChange = (key: keyof SearchFilters, value: any) => {
     onFiltersChange({
@@ -30,24 +30,24 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">篩選條件</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
       
-      {/* 價格範圍 */}
+      {/* Price Range */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          租金範圍 (NT$)
+          Price Range ($)
         </label>
         <div className="grid grid-cols-2 gap-2">
           <input
             type="number"
-            placeholder="最低價格"
+            placeholder="Min price"
             value={filters.minPrice || ''}
             onChange={(e) => handleFilterChange('minPrice', e.target.value ? parseInt(e.target.value) : undefined)}
             className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
           <input
             type="number"
-            placeholder="最高價格"
+            placeholder="Max price"
             value={filters.maxPrice || ''}
             onChange={(e) => handleFilterChange('maxPrice', e.target.value ? parseInt(e.target.value) : undefined)}
             className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -55,17 +55,17 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
         </div>
       </div>
 
-      {/* 地區 */}
+      {/* Location */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          地區
+          Location
         </label>
         <select
           value={filters.location || ''}
           onChange={(e) => handleFilterChange('location', e.target.value || undefined)}
           className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         >
-          <option value="">選擇地區</option>
+          <option value="">Select location</option>
           {locations.map((location) => (
             <option key={location} value={location}>
               {location}
@@ -74,35 +74,35 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
         </select>
       </div>
 
-      {/* 房間數 */}
+      {/* Bedrooms */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          房間數
+          Bedrooms
         </label>
         <select
           value={filters.bedrooms || ''}
           onChange={(e) => handleFilterChange('bedrooms', e.target.value ? parseInt(e.target.value) : undefined)}
           className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         >
-          <option value="">不限</option>
-          <option value="1">1房</option>
-          <option value="2">2房</option>
-          <option value="3">3房</option>
-          <option value="4">4房以上</option>
+          <option value="">Any</option>
+          <option value="1">1 bedroom</option>
+          <option value="2">2 bedrooms</option>
+          <option value="3">3 bedrooms</option>
+          <option value="4">4+ bedrooms</option>
         </select>
       </div>
 
-      {/* 物件類型 */}
+      {/* Property Type */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          物件類型
+          Property Type
         </label>
         <select
           value={filters.type || ''}
           onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
           className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         >
-          <option value="">所有類型</option>
+          <option value="">All types</option>
           {propertyTypes.map((type) => (
             <option key={type} value={type}>
               {type}
@@ -111,12 +111,12 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
         </select>
       </div>
 
-      {/* 清除篩選 */}
+      {/* Clear Filters */}
       <button
         onClick={() => onFiltersChange({})}
         className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors"
       >
-        清除所有篩選
+        Clear all filters
       </button>
     </div>
   );

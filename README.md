@@ -1,90 +1,90 @@
-# 租屋網站
+# Rental Property Website
 
-一個使用 Next.js、TypeScript 和 SQLite 建立的現代化租屋網站。
+A modern rental property website built with Next.js, TypeScript, and SQLite.
 
-## 功能特色
+## Features
 
-- 🏠 房屋列表展示
-- 🔍 搜尋和篩選功能
-- ❤️ 收藏功能
-- 📱 響應式設計
-- 📞 聯繫房東功能
-- 🎨 現代化 UI 設計
+- 🏠 Property listing display
+- 🔍 Search and filtering functionality
+- ❤️ Favorites feature
+- 📱 Responsive design
+- 📞 Contact landlord functionality
+- 🎨 Modern UI design
 
-## 技術棧
+## Tech Stack
 
-- **前端**: Next.js 14, React, TypeScript
-- **樣式**: Tailwind CSS
-- **資料庫**: SQLite with Better-SQLite3
-- **圖示**: Lucide React
-- **部署**: Vercel
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: SQLite with Better-SQLite3
+- **Icons**: Lucide React
+- **Deployment**: Vercel
 
-## 開始使用
+## Getting Started
 
-### 安裝依賴 
+### Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 初始化資料庫
+### Initialize Database
 
 ```bash
 npm run db:init
 ```
 
-### 啟動開發伺服器
+### Start Development Server
 
 ```bash
 npm run dev
 ```
 
-在瀏覽器中打開 [http://localhost:3000](http://localhost:3000) 查看結果。
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-### 建構部署
+### Build for Production
 
 ```bash
 npm run build
 npm start
 ```
 
-## 資料庫結構
+## Database Structure
 
-### Properties 表格
-- id: 主鍵
-- title: 物件標題
-- description: 物件描述
-- price: 月租金
-- location: 地點
-- area: 坪數
-- bedrooms: 房間數
-- bathrooms: 衛浴數
-- type: 物件類型
-- images: 圖片 URL
-- amenities: 設施設備
-- contact_name: 聯絡人姓名
-- contact_phone: 聯絡電話
-- contact_email: 聯絡郵箱
+### Properties Table
+- id: Primary key
+- title: Property title
+- description: Property description
+- price: Monthly rent
+- location: Location
+- area: Area in square feet
+- bedrooms: Number of bedrooms
+- bathrooms: Number of bathrooms
+- type: Property type
+- images: Image URL
+- amenities: Facilities and amenities
+- contact_name: Contact person name
+- contact_phone: Contact phone
+- contact_email: Contact email
 
-### Favorites 表格
-- id: 主鍵
-- property_id: 物件 ID (外鍵)
-- user_session: 使用者會話 ID
+### Favorites Table
+- id: Primary key
+- property_id: Property ID (foreign key)
+- user_session: User session ID
 
-## API 路由
+## API Routes
 
-- `GET /api/properties` - 取得物件列表 (支援篩選)
-- `GET /api/properties/[id]` - 取得單一物件詳情
-- `POST /api/favorites` - 新增/移除收藏
-- `GET /api/favorites` - 取得收藏列表
+- `GET /api/properties` - Get property list (with filtering support)
+- `GET /api/properties/[id]` - Get single property details
+- `POST /api/favorites` - Add/remove favorites
+- `GET /api/favorites` - Get favorites list
 
-## 部署到 Vercel
+## Deploy to Vercel
 
-1. 將專案推送到 GitHub
-2. 在 Vercel 連接 GitHub 倉庫
-3. Vercel 會自動建構和部署
+1. Push project to GitHub
+2. Connect GitHub repository in Vercel
+3. Vercel will automatically build and deploy
 
-## 專案結構
+## Project Structure
 
 ```
 src/
@@ -107,11 +107,11 @@ src/
     └── index.ts
 ```
 
-## 環境要求
+## Requirements
 
 - Node.js 18+
-- npm 或 yarn
+- npm or yarn
 
-## 授權
+## License
 
 MIT License
