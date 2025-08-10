@@ -11,7 +11,7 @@
 - 📞 聯繫房東功能
 - 🎨 現代化 UI 設計
 
-## 技術棧
+## 技術棧 //
 
 - **前端**: Next.js 14, React, TypeScript
 - **樣式**: Tailwind CSS
